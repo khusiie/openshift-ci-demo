@@ -59,6 +59,10 @@ spec:
           value: $(params.IMAGE_NAME)
         - name: TLS_VERIFY
           value: "false"
+        - name: CONTEXT
+          value: .
+        - name: DOCKERFILE
+          value: ./Dockerfile
       taskRef:
         resolver: cluster
         params:
@@ -79,7 +83,7 @@ spec:
       params:
         - name: SCRIPT
           value: |
-            oc new-app --docker-image $(params.IMAGE_NAME)
+            oc new-app --docker-image image-registry.openshift-image-registry.svc:5000/kg7460502-dev/flask-ci-app:latest
       taskRef:
         resolver: cluster
         params:
