@@ -11,9 +11,12 @@ spec:
       type: string
     - name: GIT_REVISION
       type: string
+
   workspaces:
     - name: workspace
+
   tasks:
+    # 1) git-clone
     - name: fetch-repository
       params:
         - name: URL
@@ -37,10 +40,58 @@ spec:
         - name: output
           workspace: workspace
 
-    - name: build
+    # 2) flake8 + nose2 (tests-task)
+    - name: tests
       runAfter:
         - fetch-repository
+      taskRef:
+        name: tests-task
+      workspaces:
+        - name: source
+          workspace: workspace
+
+    # 3) buildah
+    - name: build
+      runAfter:
+        - tests
       params:
         - name: IMAGE
           value: $(params.IMAGE_NAME)
-        - name
+        - name: TLS_VERIFY
+          value: "false"
+      taskRef:
+        resolver: cluster
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: buildah
+          - name: namespace
+            value: openshift-pipelines
+      workspaces:
+        - name: source
+          workspace: workspace
+
+    # 4) deploy (openshift-client)
+    - name: deploy
+      runAfter:
+        - build
+      params:
+        - name: SCRIPT
+          value: |
+            oc new-app --docker-image $(params.IMAGE_NAME)
+      taskRef:
+        resolver: cluster
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: openshift-client
+          - name: namespace
+            value: openshift-pipelines
+
+  finally:
+    # 5) cleanup
+    - name: cleanup
+      taskRef:
+        name: cleanup-task
