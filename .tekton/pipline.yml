@@ -2,32 +2,45 @@ apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   name: flask-ci-pipeline
+  namespace: kg7460502-dev
 spec:
+  params:
+    - name: IMAGE_NAME
+      type: string
+    - name: GIT_REPO
+      type: string
+    - name: GIT_REVISION
+      type: string
   workspaces:
-    - name: source
+    - name: workspace
   tasks:
-    - name: git-clone
+    - name: fetch-repository
+      params:
+        - name: URL
+          value: $(params.GIT_REPO)
+        - name: REVISION
+          value: $(params.GIT_REVISION)
+        - name: SUBDIRECTORY
+          value: ""
+        - name: DELETE_EXISTING
+          value: "true"
       taskRef:
-        kind: ClusterTask
-        name: git-clone
+        resolver: cluster
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: git-clone
+          - name: namespace
+            value: openshift-pipelines
       workspaces:
         - name: output
-          workspace: source
+          workspace: workspace
+
+    - name: build
+      runAfter:
+        - fetch-repository
       params:
-        - name: url
-          value: https://github.com/khusiie/openshift-ci-demo.git
-        - name: revision
-          value: main
-
-    - name: run-tests
-      runAfter: [git-clone]
-      taskRef:
-        name: tests-task
-      workspaces:
-        - name: source
-          workspace: source
-
-    - name: cleanup
-      runAfter: [run-tests]
-      taskRef:
-        name: cleanup-task
+        - name: IMAGE
+          value: $(params.IMAGE_NAME)
+        - name
