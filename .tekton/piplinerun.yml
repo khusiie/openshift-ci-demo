@@ -9,7 +9,7 @@ spec:
 
   params:
     - name: IMAGE_NAME
-      value: image-registry.openshift-image-registry.svc:5000/kg7460502-dev/flask-ci:latest
+      value: image-registry.openshift-image-registry.svc:5000/kg7460502-dev/flask-ci-app:latest
     - name: GIT_REPO
       value: https://github.com/khusiie/openshift-ci-demo.git
     - name: GIT_REVISION
@@ -17,6 +17,12 @@ spec:
 
   workspaces:
     - name: workspace
-      persistentVolumeClaim:
-        claimName: ci-demo-workspace
-
+      volumeClaimTemplate:
+        metadata:
+          name: flask-ci-workspace-pvc
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
