@@ -1,0 +1,11 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: flask-ci-pipelinerun
+spec:
+  pipelineRef:
+    name: flask-ci-pipeline
+  workspaces:
+    - name: source
+      persistentVolumeClaim:
+        claimName: ci-demo-workspace
