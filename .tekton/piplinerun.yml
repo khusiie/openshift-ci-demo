@@ -2,10 +2,20 @@ apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   name: flask-ci-pipelinerun
+  namespace: kg7460502-dev
 spec:
   pipelineRef:
     name: flask-ci-pipeline
+
+  params:
+    - name: IMAGE_NAME
+      value: image-registry.openshift-image-registry.svc:5000/kg7460502-dev/flask-ci:latest
+    - name: GIT_REPO
+      value: https://github.com/khusiie/openshift-ci-demo.git
+    - name: GIT_REVISION
+      value: main
+
   workspaces:
-    - name: source
+    - name: workspace
       persistentVolumeClaim:
         claimName: ci-demo-workspace
