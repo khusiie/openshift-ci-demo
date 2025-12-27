@@ -1,4 +1,3 @@
-cat > tests\test_app.py << 'EOF'
 from app import app
 
 def test_index():
@@ -6,4 +5,3 @@ def test_index():
     resp = client.get("/")
     assert resp.status_code == 200
     assert b"Hello from CI/CD!" in resp.data
-EOF
