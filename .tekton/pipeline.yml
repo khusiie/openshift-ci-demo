@@ -1,0 +1,33 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: flask-ci-pipeline
+spec:
+  workspaces:
+    - name: source
+  tasks:
+    - name: git-clone
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: source
+      params:
+        - name: url
+          value: https://github.com/khusiie/openshift-ci-demo.git
+        - name: revision
+          value: main
+
+    - name: run-tests
+      runAfter: [git-clone]
+      taskRef:
+        name: tests-task
+      workspaces:
+        - name: source
+          workspace: source
+
+    - name: cleanup
+      runAfter: [run-tests]
+      taskRef:
+        name: cleanup-task
